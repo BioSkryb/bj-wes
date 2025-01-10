@@ -3,12 +3,12 @@
         "content": [
             "nf-wes-pipeline_selected_metrics_mqc.txt:md5,eacda23ee1015f71b69af430fb80ea2a"
         ],
-        "timestamp": "2024-09-18T14:15:10+0000"
+        "timestamp": "2024-12-19T17:19:07+0000"
     },
     "all_metrics_mqc": {
         "content": [
-            "nf-wes-pipeline_all_metrics_mqc.txt:md5,bd289a6e25ee78a564e5255565b00068"
+            "nf-wes-pipeline_all_metrics_mqc.txt:md5,1dbdf86234064d849cfc1cb1f18a7f16"
         ],
-        "timestamp": "2024-09-18T14:15:10+0000"
+        "timestamp": "2024-12-19T17:19:07+0000"
     }
 }

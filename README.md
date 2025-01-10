@@ -1,5 +1,5 @@
 
-# BJ-WES-pipeline
+# BaseJumper BJ-WES-pipeline
 
 BJ-WES pipeline is a scalable and reproducible bioinformatics pipeline to process whole exome/targeted panel sequencing data. The pipeline currently supports human and mouse sequencing data but can certainly be extended to other model systems. It supports sequencing data from Illumina, Ultima, and Element. The pipeline takes raw sequencing data in form of fastq/cram files. It then aligns, removes duplicate reads, base calibrates the reads, and performs variant calling with haplotype caller and DNAScope caller. For Illumina sequencing data, users have option to use primary template amplification (PTA) corrected DNAScope model to do variant calling.
 
@@ -106,12 +106,12 @@ nextflow run main.nf --input_csv $PWD/tests/data/inputs/input.csv --publish_dir 
 
 The input for the pipeline can be passed via a input.csv with a meta data.
 
-- **CSV Metadata Input**: The CSV file should have 4 columns: `biosampleName`, `reads`, `read1` and `read2`. 
-The `biosampleName` column contains the name of the biosample, `reads` have the number of reads and `read1` and `read2` has the path to the input reads. For example:
+- **CSV Metadata Input**: The CSV file should have 3 columns: `biosampleName`, `read1` and `read2`. 
+The `biosampleName` column contains the name of the biosample,`read1` and `read2` has the path to the input reads. For example:
 
 ```
-biosampleName,reads,read1,read2
-chr22_testsample1,1000000,s3://bioskryb-public-data/pipeline_resources/dev-resources/local_test_files/chr22_testsample1_S1_L001_R1_001.fastq.gz,s3://bioskryb-public-data/pipeline_resources/dev-resources/local_test_files/chr22_testsample1_S1_L001_R2_001.fastq.gz
+biosampleName,read1,read2
+chr22_testsample1,s3://bioskryb-public-data/pipeline_resources/dev-resources/local_test_files/chr22_testsample1_S1_L001_R1_001.fastq.gz,s3://bioskryb-public-data/pipeline_resources/dev-resources/local_test_files/chr22_testsample1_S1_L001_R2_001.fastq.gz
 ```
 
 - **CSV Metadata Input for Ultima**: The CSV file should have 4 columns: `biosampleName`, `reads`, `cram` and `crai`. 
@@ -201,6 +201,9 @@ Script Options: see nextflow.config
                                         Provide the read counts as comma-separated values.
 
     --NEAR_DISTANCE             INT     This parameter is used in the picard hsmetrics and is set to 250 by default.
+
+    --min_reads                 VAL     Minimum number of reads required for analysis. Samples with fewer reads will be flagged.
+                                        DEFAULT: 1000
 
     --help                      BOOL    Display help message
 

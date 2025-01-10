@@ -73,6 +73,9 @@ def helpMessage() {
                                             Provide the read counts as comma-separated values.
 
         --NEAR_DISTANCE             INT     This parameter is used in the picard hsmetrics and is set to 250 by default.
+
+        --min_reads                 VAL     Minimum number of reads required for analysis. Samples with fewer reads will be flagged.
+                                            DEFAULT: 1000
       
         --help                      BOOL    Display help message
 

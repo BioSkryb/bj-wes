@@ -56,7 +56,7 @@ workflow PICARD_COLLECTHSMETRICS_WF {
                                     ch_enable_publish
                                 )
     emit:
-        report = PICARD_COLLECTHSMETRICS.out.metrics
+        report = PICARD_COLLECTHSMETRICS.out.metrics_tuple
         version = PICARD_COLLECTHSMETRICS.out.version
 }
 
