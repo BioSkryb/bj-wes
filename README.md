@@ -1,5 +1,5 @@
 
-# BJ-WES-pipeline
+# BaseJumper BJ-WES-pipeline
 
 BJ-WES pipeline is a scalable and reproducible bioinformatics pipeline to process whole exome/targeted panel sequencing data. The pipeline currently supports human and mouse sequencing data but can certainly be extended to other model systems. It supports sequencing data from Illumina, Ultima, and Element. The pipeline takes raw sequencing data in form of fastq/cram files. It then aligns, removes duplicate reads, base calibrates the reads, and performs variant calling with haplotype caller and DNAScope caller. For Illumina sequencing data, users have option to use primary template amplification (PTA) corrected DNAScope model to do variant calling.
 
