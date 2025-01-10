@@ -51,7 +51,8 @@ workflow {
     WES_WF( 
                 params.input_csv,
                 ch_reads,
-                ch_dummy_file
+                ch_dummy_file,
+                params.min_reads
              )
     
     
