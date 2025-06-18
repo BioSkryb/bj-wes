@@ -11,6 +11,9 @@ nextflow_pipeline {
                 publish_dir = "${outputDir}/results"
                 timestamp = "test"
                 skip_ado = true
+                skip_vcfeval = false
+                max_cpus = 4
+                max_memory = "14.GB"
                 architecture = "x86"
                 input_csv = "$baseDir/tests/data/inputs/input.csv"
             }

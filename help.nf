@@ -17,7 +17,6 @@ def helpMessage() {
 
   def yellow = "\033[0;33m"
   def blue = "\033[0;34m"
-  def white = "\033[0m"
   def red = "\033[0;31m"
 
   log.info """\
@@ -60,6 +59,9 @@ def helpMessage() {
 
         --skip_variant_annotation   BOOL    Whether to skip variant annotation
                                             DEFAULT: ${params.skip_annotation}
+
+        --skip_sigprofile           BOOL    Whether to skip Mutational Signature
+                                            DEFAULT: ${params.skip_sigprofile}
 
         --platform                  STR     Select the sequencing platform. 
                                             Available options - Illumina, Ultima, Element

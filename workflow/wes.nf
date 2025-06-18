@@ -1,5 +1,3 @@
-nextflow.enable.dsl=2
-import groovy.json.JsonOutput
 /*
 ========================================================================================
     IMPORT MODULES/SUBWORKFLOWS
@@ -11,67 +9,25 @@ import groovy.json.JsonOutput
 // MODULES
 //
 
-include { PUBLISH_INPUT_DATASET_WF } from '../nf-bioskryb-utils/modules/bioskryb/publish_input_dataset/main.nf' addParams(timestamp: params.timestamp)
-include { SEQTK_WF } from '../nf-bioskryb-utils/modules/seqtk/sample/main.nf' addParams(timestamp: params.timestamp)
-include { SENTIEON_SECONDARY_WF } from '../nf-bioskryb-utils/subworkflows/sentieon_secondary_wf/main.nf' addParams(timestamp: params.timestamp)
-include { SENTIEON_DRIVER_METRICS_WF } from '../nf-bioskryb-utils/modules/sentieon/driver/metrics/main.nf' addParams(timestamp: params.timestamp)
-include { PICARD_COLLECTHSMETRICS } from '../nf-bioskryb-utils/modules/picard/collecthsmetrics/main.nf' addParams( timestamp: params.timestamp )
-include { SENTIEON_DRIVER_COVERAGEMETRICS_WF } from '../nf-bioskryb-utils/modules/sentieon/driver/coveragemetrics/main.nf' addParams(timestamp: params.timestamp)
-include { CUSTOM_DATA_PROCESSING_WF } from '../modules/local/custom_data_processing/main.nf' addParams(timestamp: params.timestamp)
-include { CUSTOM_REPORT_WF } from '../modules/local/custom_report/main.nf' addParams(timestamp: params.timestamp)
-include { SCORE_VARIANTS_VCFEVAL_WF } from '../nf-bioskryb-utils/subworkflows/score_variants_vcfeval/main.nf' addParams(timestamp: params.timestamp)
-include { ADO_WF } from '../nf-bioskryb-utils/subworkflows/ado/main.nf' addParams(timestamp: params.timestamp)
-include { BCFTOOLS_VIEW } from '../nf-bioskryb-utils/modules/bcftools/view/main.nf' addParams(timestamp: params.timestamp)
-include { SNPEFF_ANNOTATION_WF } from '../nf-bioskryb-utils/modules/snpeff/main.nf' addParams(timestamp: params.timestamp)
-include { MULTIQC_WF } from '../nf-bioskryb-utils/modules/multiqc/main.nf' addParams(timestamp: params.timestamp)
-include { REPORT_VERSIONS_WF } from '../nf-bioskryb-utils/modules/bioskryb/report_tool_versions/main.nf' addParams(timestamp: params.timestamp)
-include { COUNT_READS_FASTQ_WF } from '../nf-bioskryb-utils/modules/bioskryb/custom_read_counts/main.nf' addParams(timestamp: params.timestamp)
+include { PUBLISH_INPUT_DATASET_WF } from '../nf-bioskryb-utils/modules/bioskryb/publish_input_dataset/main.nf'
+include { SEQTK_WF } from '../nf-bioskryb-utils/modules/seqtk/sample/main.nf'
+include { SENTIEON_SECONDARY_WF } from '../nf-bioskryb-utils/subworkflows/sentieon_secondary_wf/main.nf'
+include { SENTIEON_DRIVER_METRICS_WF } from '../nf-bioskryb-utils/modules/sentieon/driver/metrics/main.nf'
+include { PICARD_COLLECTHSMETRICS } from '../nf-bioskryb-utils/modules/picard/collecthsmetrics/main.nf'
+include { SENTIEON_DRIVER_COVERAGEMETRICS_WF } from '../nf-bioskryb-utils/modules/sentieon/driver/coveragemetrics/main.nf'
+include { CUSTOM_DATA_PROCESSING_WF } from '../modules/local/custom_data_processing/main.nf'
+include { CUSTOM_REPORT_WF } from '../modules/local/custom_report/main.nf'
+include { SCORE_VARIANTS_VCFEVAL_WF } from '../nf-bioskryb-utils/subworkflows/score_variants_vcfeval/main.nf'
+include { PREPROCESS_VCF } from '../nf-bioskryb-utils/modules/bcftools/preprocess_vcf/main.nf'
+include { ADO_WF } from '../nf-bioskryb-utils/subworkflows/ado/main.nf'
+include { BCFTOOLS_VIEW } from '../nf-bioskryb-utils/modules/bcftools/view/main.nf'
+include { SNPEFF_ANNOTATION_WF } from '../nf-bioskryb-utils/modules/snpeff/main.nf'
+include { MULTIQC_WF } from '../nf-bioskryb-utils/modules/multiqc/main.nf'
+include { REPORT_VERSIONS_WF } from '../nf-bioskryb-utils/modules/bioskryb/report_tool_versions/main.nf'
+include { COUNT_READS_FASTQ_WF } from '../nf-bioskryb-utils/modules/bioskryb/custom_read_counts/main.nf'
+include { SIGPROFILERGENERATEMATRIX_WF} from '../nf-bioskryb-utils/modules/sigprofilermatrixgenerator/main.nf'
 
-params.reference                    = params.genomes [ params.genome ] [ 'reference' ]
-params.base_metrics_intervals       = params.genomes [ params.genome ] [ 'base_metrics_intervals' ]
-params.dbsnp                        = params.genomes [ params.genome ] [ 'dbsnp' ]
-params.dbsnp_index                  = params.genomes [ params.genome ] [ 'dbsnp_index' ]
-params.clinvar                      = params.genomes [ params.genome ] [ 'clinvar' ]
-params.clinvar_index                = params.genomes [ params.genome ] [ 'clinvar_index' ]
-params.mills                        = params.genomes [ params.genome ] [ 'mills' ]
-params.mills_index                  = params.genomes [ params.genome ] [ 'mills_index' ]
-params.onekg_omni                   = params.genomes [ params.genome ] [ 'onekg_omni' ]
-params.onekg_omni_index             = params.genomes [ params.genome ] [ 'onekg_omni_index' ]
-params.dbnsfp                       = params.genomes [ params.genome ] [ 'dbnsfp' ]
-params.dbnsfp_index                 = params.genomes [ params.genome ] [ 'dbnsfp_index' ]
-params.snpeff_db                    = params.genomes [ params.genome ] [ 'snpeff_db' ]
-params.snpeff_genome_name           = params.genomes [ params.genome ] [ 'snpeff_genome_name' ]
-params.roi_intervals                = params.genomes [ params.genome ] [ 'roi_intervals' ]
-params.refseq                       = params.genomes [ params.genome ] [ 'refseq' ]
-dnascope_model                      = ""
-if ( params.genome == 'GRCh38' ) {
-    dnascope_model                      = params.genomes [ params.genome ] [ params.platform ] [ params.dnascope_model_selection ] [ params.mode ] [ 'dnascope_model' ]
-    params.vcfeval_baseline_vcf         = params.genomes [ params.genome ] [ params.giab_reference_name ] [ 'vcfeval_baseline_vcf' ]
-    params.vcfeval_baseline_vcf_index   = params.genomes [ params.genome ] [ params.giab_reference_name ] [ 'vcfeval_baseline_vcf_index' ]
-    params.vcfeval_baseline_regions     = params.genomes [ params.genome ] [ params.giab_reference_name ] [ 'vcfeval_baseline_regions' ]
-    params.giab_genome_name             = params.genomes [ params.genome ] [ params.giab_reference_name ] [ 'giab_genome_name' ]
-    params.vcfeval_reference_sdf_ref    = params.genomes [ params.genome ] [ 'vcfeval_reference_sdf_ref']
-}
 
-if ( params.mode == 'wgs' ) {
-    params.wgs_or_target_intervals      = params.genomes [ params.genome ] [ 'wgs_or_target_intervals' ]
-    params.calling_intervals_filename   = params.genomes [ params.genome ] [ 'calling_intervals_filename' ]
-    if ( params.genome == 'GRCh38' ) {
-        params.vcfeval_bed_regions          = params.genomes [ params.genome ] [ params.giab_reference_name ] [ 'vcfeval_bed_regions' ]
-    }
-}
-
-if ( params.mode == 'exome' ) {
-    params.wgs_or_target_intervals      = params.genomes [ params.genome ] [ params.exome_panel ] [ 'wgs_or_target_intervals' ]
-    params.calling_intervals_filename   = params.genomes [ params.genome ] [ params.exome_panel ] [ 'calling_intervals_filename' ]
-    if ( params.genome == 'GRCh38' ) {
-        params.vcfeval_bed_regions          = params.genomes [ params.genome ] [ params.exome_panel ] [ 'vcfeval_bed_regions' ]
-    }
-}
-
-// Override variant caller for GRCm39 genome (make sure to use the below variable in the downstream instead of params.variant_caller)
-variant_caller_modified = (params.genome == 'GRCm39') ? 'haplotyper' : params.variant_caller
-println "INFO: Variant caller is set to ${variant_caller_modified} for ${params.genome} genome"
 
 workflow WES_WF {
 
@@ -80,8 +36,93 @@ workflow WES_WF {
         ch_reads
         ch_dummy_file
         ch_min_reads
+        ch_genomes
+        ch_genome
+        ch_platform
+        ch_dnascope_model_selection
+        ch_mode
+        ch_giab_reference_name
+        ch_exome_panel
+        ch_variant_caller
+        ch_skip_subsampling
+        ch_subsample_array
+        ch_read_length
+        ch_seqtk_sample_seed
+        ch_reference
+        ch_dbsnp
+        ch_dbsnp_index
+        ch_mills
+        ch_mills_index
+        ch_onekg_omni
+        ch_onekg_omni_index
+        ch_ploidy
+        ch_pcrfree
+        ch_tmp_dir
+        ch_timestamp
+        ch_skip_ado
+        ch_ado_infer_germ_het
+        ch_ado_slice_het_sites
+        ch_ado_jg_file
+        ch_ado_min_samples
+        ch_ado_variant_type
+        ch_ado_min_af
+        ch_ado_max_af
+        ch_ado_sample_prop
+        ch_ado_cov_cutoff
+        ch_base_metrics_intervals
+        ch_skip_gene_coverage
+        ch_roi_intervals
+        ch_refseq
+        ch_skip_variant_annotation
+        ch_skip_vcfeval
+        ch_vcfeval_output_mode
+        ch_vcfeval_score_metric
+        ch_vcfeval_other_options
+        ch_snpeff_db
+        ch_snpeff_genome_name
+        ch_hgvs_old
+        ch_multiqc_config
+        ch_near_distance
+        ch_sigprofilermatrixgenerator_reference
+        ch_report_s3_dir
+        ch_skip_sigprofile
+        ch_publish_dir
+        ch_enable_publish
+        ch_disable_publish
 
     main:
+
+        dnascope_model                      = ""
+        if ( ch_genome == 'GRCh38' ) {
+            dnascope_model                      = ch_genomes [ ch_genome ] [ ch_platform ] [ ch_dnascope_model_selection ] [ ch_mode ] [ 'dnascope_model' ]
+            vcfeval_baseline_vcf         = ch_genomes [ ch_genome ] [ ch_giab_reference_name ] [ 'vcfeval_baseline_vcf' ]
+            vcfeval_baseline_vcf_index   = ch_genomes [ ch_genome ] [ ch_giab_reference_name ] [ 'vcfeval_baseline_vcf_index' ]
+            vcfeval_baseline_regions     = ch_genomes [ ch_genome ] [ ch_giab_reference_name ] [ 'vcfeval_baseline_regions' ]
+            giab_genome_name             = ch_genomes [ ch_genome ] [ ch_giab_reference_name ] [ 'giab_genome_name' ]
+            vcfeval_reference_sdf_ref    = ch_genomes [ ch_genome ] [ 'vcfeval_reference_sdf_ref']
+        }
+
+        if ( ch_mode == 'wgs' ) {
+            wgs_or_target_intervals      = ch_genomes [ ch_genome ] [ 'wgs_or_target_intervals' ]
+            calling_intervals_filename   = ch_genomes [ ch_genome ] [ 'calling_intervals_filename' ]
+            sigprofilermatrixgenerator_interval = ch_genomes [ ch_genome ] [ 'sigprofilermatrixgenerator_interval' ]
+            if ( ch_genome == 'GRCh38' ) {
+                vcfeval_bed_regions          = ch_genomes [ ch_genome ] [ ch_giab_reference_name ] [ 'vcfeval_bed_regions' ]
+            }
+        }
+
+        if ( ch_mode == 'exome' ) {
+            wgs_or_target_intervals      = ch_genomes [ ch_genome ] [ ch_exome_panel ] [ 'wgs_or_target_intervals' ]
+            calling_intervals_filename   = ch_genomes [ ch_genome ] [ ch_exome_panel ] [ 'calling_intervals_filename' ]
+            if ( ch_genome == 'GRCh38' ) {
+                vcfeval_bed_regions          = ch_genomes [ ch_genome ] [ ch_exome_panel ] [ 'vcfeval_bed_regions' ]
+            }
+            sigprofilermatrixgenerator_interval = ch_genomes [ ch_genome ] [ ch_exome_panel ] [ 'vcfeval_bed_regions' ]
+        }
+
+        // Override variant caller for GRCm39 genome (make sure to use the below variable in the downstream instead of ch_variant_caller)
+        variant_caller_modified = (ch_genome == 'GRCm39') ? 'haplotyper' : ch_variant_caller
+        println "INFO: Variant caller is set to ${variant_caller_modified} for ${ch_genome} genome"
 
         /*
         ========================================================================================
@@ -89,32 +130,31 @@ workflow WES_WF {
         ========================================================================================
         */
     
-        if ( params.input_csv ) {
+        if ( ch_input_csv ) {
             
             PUBLISH_INPUT_DATASET_WF (
                                         ch_input_csv,
-                                        params.publish_dir,
-                                        params.enable_publish
+                                        ch_publish_dir,
+                                        ch_enable_publish
                                     )
         } else {
             ch_input_csv = Channel.fromPath("$projectDir/assets/input_csv_dummy_file.txt", checkIfExists: true).collect()
         }
 
-        if (!params.skip_subsampling) {
-            if (!params.subsample_array) {
-                log.error "ERROR: subsample_array is empty"
-                exit 1
+        if (!ch_skip_subsampling) {
+            if (!ch_subsample_array) {
+                error "ERROR: subsample_array is empty"
             } else {
-                ch_subsample_array = Channel.from(params.subsample_array.toString().split(',').collect { it.trim().toInteger() })
+                ch_subsample_array = Channel.from(ch_subsample_array.toString().split(',').collect { value -> value.trim().toInteger() })
                 combined_channel = ch_reads.combine(ch_subsample_array)
 
                 SEQTK_WF (
                     combined_channel,
                     false,
-                    params.read_length,
-                    params.seqtk_sample_seed,
-                    params.publish_dir,
-                    params.enable_publish
+                    ch_read_length,
+                    ch_seqtk_sample_seed,
+                    ch_publish_dir,
+                    ch_enable_publish
                 )
                 ch_reads = SEQTK_WF.out.reads_sampledName
             }    
@@ -122,16 +162,17 @@ workflow WES_WF {
 
         COUNT_READS_FASTQ_WF (
                                 ch_reads,
-                                params.publish_dir,
-                                params.enable_publish
+                                ch_publish_dir,
+                                ch_enable_publish
                             )
         COUNT_READS_FASTQ_WF.out.read_counts
-        .map { sample_id, files, read_count -> 
-            [sample_id, files, read_count.toInteger()]
+        .map { sample_id, files, read_count_file -> 
+            def read_count = read_count_file.text.trim().toLong()
+            [sample_id, files, read_count]
         }
-        .branch {
-            small: it[2] < ch_min_reads
-            large: it[2] >= ch_min_reads
+        .branch { read ->
+            small: read[2] < ch_min_reads
+            large: read[2] >= ch_min_reads
         }
         .set { branched_reads }
 
@@ -140,7 +181,7 @@ workflow WES_WF {
             .ifEmpty {
                 error "No samples have minimum reads for processing."
             }
-            .map { sample_id, files, read_count ->
+            .map { sample_id, files, _read_count ->
                 tuple(sample_id, files)
             }
             .set { ch_fastqs }
@@ -153,23 +194,23 @@ workflow WES_WF {
         ========================================================================================
         */
         SENTIEON_SECONDARY_WF ( 
-                                params.genome,
+                                ch_genome,
                                 ch_fastqs,
-                                params.reference,
-                                params.dbsnp,
-                                params.dbsnp_index,
-                                params.mills,
-                                params.mills_index,
-                                params.onekg_omni,
-                                params.onekg_omni_index,
-                                params.calling_intervals_filename,
-                                params.ploidy,
+                                ch_reference,
+                                ch_dbsnp,
+                                ch_dbsnp_index,
+                                ch_mills,
+                                ch_mills_index,
+                                ch_onekg_omni,
+                                ch_onekg_omni_index,
+                                calling_intervals_filename,
+                                ch_ploidy,
                                 dnascope_model,
-                                params.pcrfree,
-                                params.platform,
+                                ch_pcrfree,
+                                ch_platform,
                                 variant_caller_modified,
-                                params.publish_dir,
-                                params.enable_publish
+                                ch_publish_dir,
+                                ch_enable_publish
                              )
         
         ch_bam = SENTIEON_SECONDARY_WF.out.bam
@@ -179,28 +220,52 @@ workflow WES_WF {
         ch_sentieon_version = SENTIEON_SECONDARY_WF.out.version
 
 
-        if (SENTIEON_SECONDARY_WF.out.recal_table.count().map { it == 0 }) {
+        if (SENTIEON_SECONDARY_WF.out.recal_table.count().map { count -> count == 0 }) {
             ch_bam_recal_input = ch_bam.combine(ch_dummy_file)
         } else {
             ch_bam_recal_input = ch_bam.join(SENTIEON_SECONDARY_WF.out.recal_table)
         }
 
-        ch_bam.ifEmpty{ exit 1, "ERROR: cannot generate any alignment files.\nPlease check whether the pipeline parameters/profiles were set correctly or whether the specified files dont have low reads in them." }
+        ch_bam.ifEmpty{ error "ERROR: cannot generate any alignment files.\nPlease check whether the pipeline parameters/profiles were set correctly or whether the specified files dont have low reads in them." }
        
         ch_bam
-            .collectFile( name: "bam_files.txt", newLine: true, sort: { it[0] }, storeDir: "${params.tmp_dir}" )
-                { it[0] + "\t" + "${params.publish_dir}_${params.timestamp}/secondary_analyses/alignment/" + it[1].getName() }
+            .collectFile( name: "bam_files.txt", newLine: true, sort: { sample -> sample[0] }, storeDir: "${ch_tmp_dir}" )
+                { sample -> sample[0] + "\t" + "${ch_publish_dir}_${ch_timestamp}/secondary_analyses/alignment/" + sample[1].getName() }
 
-        if ( params.genome == "GRCh37" || params.genome == "GRCh38" ){
+        if ( (ch_variant_caller == 'dnascope' ) && (ch_genome == "GRCh37" || ch_genome == "GRCh38") ) {
     
             ch_dnascope_vcf
-                .collectFile( name: "vcf_files.txt", newLine: true, sort: { it[0] }, storeDir: "${params.tmp_dir}" )
-                    { it[0] + "\t" + "${params.publish_dir}_${params.timestamp}/secondary_analyses/variant_calls_dnascope/" + it[1][0].getName() }
-        }else{
+                .collectFile( name: "vcf_files.txt", newLine: true, sort: { sample -> sample[0] }, storeDir: "${ch_tmp_dir}" )
+                    { sample -> sample[0] + "\t" + "${ch_publish_dir}_${ch_timestamp}/secondary_analyses/variant_calls_dnascope/" + sample[1][0].getName() }
+        }            
+        if (ch_variant_caller == 'haplotyper') {
             ch_haplotyper_vcf
-                .collectFile( name: "vcf_files.txt", newLine: true, sort: { it[0] }, storeDir: "${params.tmp_dir}" )
-                    { it[0] + "\t" + "${params.publish_dir}_${params.timestamp}/secondary_analyses/variant_calls_haplotyper/" + it[1][0].getName() }
+                .collectFile( name: "vcf_files.txt", newLine: true, sort: { sample -> sample[0] }, storeDir: "${ch_tmp_dir}" )
+                    { sample -> sample[0] + "\t" + "${ch_publish_dir}_${ch_timestamp}/secondary_analyses/variant_calls_haplotyper/" + sample[1][0].getName() }
         }
+
+        
+    /*
+    ========================================================================================
+        MUTATION SIGNATURE
+    ========================================================================================
+    */
+
+    if ( !ch_skip_sigprofile ) { 
+        // Selecting the non empty vcf channel from dnascope or haplotyper
+        ch_vcf_out = ch_dnascope_vcf.mix(ch_haplotyper_vcf).ifEmpty { null }
+        SIGPROFILERGENERATEMATRIX_WF (
+            ch_vcf_out.map { sample_name, vcf_files -> [sample_name, vcf_files[0], vcf_files[1]] },
+            sigprofilermatrixgenerator_interval,
+            ch_reference,
+            ch_genome,
+            ch_sigprofilermatrixgenerator_reference,
+            ch_report_s3_dir,
+            ch_publish_dir,
+            ch_enable_publish,
+            ch_disable_publish
+        )
+    }
         
         /*
         ========================================================================================
@@ -212,27 +277,27 @@ workflow WES_WF {
         ch_ado_plot = Channel.empty()
         ch_ado_summary_table = Channel.empty()
         ch_ado_version = Channel.empty()
-        if ( params.genome == "GRCh38" ){
+        if ( ch_genome == "GRCh38" ){
             
-            if ( !params.skip_ado ) {
+            if ( !ch_skip_ado ) {
     
                                     ADO_WF(
-                                            params.ado_infer_germ_het,
-                                            params.ado_slice_het_sites,
-                                            params.ado_jg_file,
-                                            params.dbsnp,
-                                            params.ado_min_samples,
-                                            params.ado_variant_type,
-                                            params.ado_min_af,
-                                            params.ado_max_af,
-                                            params.vcfeval_baseline_vcf,
+                                            ch_ado_infer_germ_het,
+                                            ch_ado_slice_het_sites,
+                                            ch_ado_jg_file,
+                                            ch_dbsnp,
+                                            ch_ado_min_samples,
+                                            ch_ado_variant_type,
+                                            ch_ado_min_af,
+                                            ch_ado_max_af,
+                                            vcfeval_baseline_vcf,
                                             ch_dnascope_vcf,
-                                            params.vcfeval_bed_regions,
-                                            params.reference,
-                                            params.ado_sample_prop,
-                                            params.ado_cov_cutoff,
-                                            params.publish_dir,
-                                            params.disable_publish
+                                            vcfeval_bed_regions,
+                                            ch_reference,
+                                            ch_ado_sample_prop,
+                                            ch_ado_cov_cutoff,
+                                            ch_publish_dir,
+                                            ch_disable_publish
                                           )
                 ch_ado_report = ADO_WF.out.ado_summary
                 ch_ado_plot = ADO_WF.out.ado_summary_plot
@@ -255,12 +320,13 @@ workflow WES_WF {
 
         SENTIEON_DRIVER_METRICS_WF (
                                       ch_bam_recal_input,
-                                      params.reference,
-                                      params.base_metrics_intervals,
-                                      params.wgs_or_target_intervals,
-                                      params.mode,
-                                      params.publish_dir,
-                                      params.enable_publish
+                                      ch_reference,
+                                      ch_base_metrics_intervals,
+                                      wgs_or_target_intervals,
+                                      ch_mode,
+                                      "dedup", // dedup or non dedup
+                                      ch_publish_dir,
+                                      ch_enable_publish
                                   )
         
         ch_sentieon_metrics_version = SENTIEON_DRIVER_METRICS_WF.out.version
@@ -268,24 +334,24 @@ workflow WES_WF {
 
         PICARD_COLLECTHSMETRICS ( 
                                     ch_bam,
-                                    params.reference,
-                                    params.wgs_or_target_intervals,
-                                    params.publish_dir,
-                                    params.enable_publish
+                                    ch_reference,
+                                    wgs_or_target_intervals,
+                                    ch_publish_dir,
+                                    ch_enable_publish
                             )
         ch_picard_version = PICARD_COLLECTHSMETRICS.out.version
                           
-        if ( params.genome == "GRCh38" ){
+        if ( ch_genome == "GRCh38" ){
     
-            if ( !params.skip_gene_coverage ) {
+            if ( !ch_skip_gene_coverage ) {
         
                 SENTIEON_DRIVER_COVERAGEMETRICS_WF (
                                                     ch_bam_recal_input,
-                                                    params.reference,
-                                                    params.roi_intervals,
-                                                    params.refseq,
-                                                    params.publish_dir,
-                                                    params.enable_publish
+                                                    ch_reference,
+                                                    ch_roi_intervals,
+                                                    ch_refseq,
+                                                    ch_publish_dir,
+                                                    ch_enable_publish
                                             )
             }
         }
@@ -304,13 +370,12 @@ workflow WES_WF {
 
         CUSTOM_DATA_PROCESSING_WF ( 
                                     ch_custom_data_processing_input,
-                                    params.mode,
-                                    params.publish_dir,
-                                    params.disable_publish
+                                    ch_mode,
+                                    ch_publish_dir,
+                                    ch_disable_publish
                                   )
 
         ch_merge_metrics_report = CUSTOM_DATA_PROCESSING_WF.out.metrics
-        ch_merge_metrics_version = CUSTOM_DATA_PROCESSING_WF.out.version
 
 
         CUSTOM_REPORT_WF ( 
@@ -318,13 +383,12 @@ workflow WES_WF {
                             COUNT_READS_FASTQ_WF.out.combined_read_counts,
                             ch_min_reads,
                             ch_ado_summary_table,
-                            params.subsample_array,
-                            params.publish_dir,
-                            params.enable_publish
+                            ch_subsample_array,
+                            ch_publish_dir,
+                            ch_enable_publish
                          )
 
         ch_custom_report = CUSTOM_REPORT_WF.out.mqc
-        ch_custom_report_version = CUSTOM_REPORT_WF.out.version
 
 
         /*
@@ -333,22 +397,22 @@ workflow WES_WF {
         ========================================================================================
         */
 
-        if ( params.genome == "GRCh38" ) {
-            if ( !params.skip_variant_annotation || !params.skip_vcfeval ) {
+        if ( ch_genome == "GRCh38" ) {
+            if ( !ch_skip_variant_annotation || !ch_skip_vcfeval ) {
 
                 BCFTOOLS_VIEW (
                                 ch_dnascope_vcf,
-                                params.publish_dir,
-                                params.disable_publish
+                                ch_publish_dir,
+                                ch_disable_publish
                 )
             }
-        } else if ( params.genome == 'GRCm38') {
-            if ( !params.skip_variant_annotation ) {
+        } else if ( ch_genome == 'GRCm38') {
+            if ( !ch_skip_variant_annotation ) {
 
                 BCFTOOLS_VIEW (
                                 ch_haplotyper_vcf,
-                                params.publish_dir,
-                                params.disable_publish
+                                ch_publish_dir,
+                                ch_disable_publish
                 )
             }
         }
@@ -363,26 +427,33 @@ workflow WES_WF {
         ch_bcftools_version = Channel.empty()
         ch_vcfeval_version = Channel.empty()
 
-        if ( params.genome == "GRCh38" ){
+        if ( ch_genome == "GRCh38" ){
             
-            if ( !params.skip_vcfeval ) {
+            if ( !ch_skip_vcfeval ) {
+
+                PREPROCESS_VCF (
+                                    BCFTOOLS_VIEW.out.filtered_wt_vcf,
+                                    ch_reference,
+                                    ch_publish_dir,
+                                    ch_enable_publish
+                                    )
     
                 SCORE_VARIANTS_VCFEVAL_WF (
-                                            BCFTOOLS_VIEW.out.filtered_wt_vcf,
-                                            params.vcfeval_baseline_vcf,
-                                            params.vcfeval_baseline_vcf_index,
-                                            params.vcfeval_baseline_regions,
-                                            params.vcfeval_bed_regions,
-                                            params.vcfeval_reference_sdf_ref,
-                                            params.vcfeval_output_mode,
-                                            params.giab_genome_name,
-                                            params.vcfeval_score_metric,
-                                            params.vcfeval_other_options,
-                                            params.publish_dir,
+                                            PREPROCESS_VCF.out.vcf,
+                                            vcfeval_baseline_vcf,
+                                            vcfeval_baseline_vcf_index,
+                                            vcfeval_baseline_regions,
+                                            vcfeval_bed_regions,
+                                            vcfeval_reference_sdf_ref,
+                                            ch_vcfeval_output_mode,
+                                            giab_genome_name,
+                                            ch_vcfeval_score_metric,
+                                            ch_vcfeval_other_options,
+                                            ch_publish_dir,
                                             "vcf",
-                                            params.reference,
-                                            params.enable_publish,
-                                            params.disable_publish
+                                            ch_reference,
+                                            ch_enable_publish,
+                                            ch_disable_publish
                                           )
                 ch_vcfeval_report = SCORE_VARIANTS_VCFEVAL_WF.out.report
                 ch_bcftools_version = SCORE_VARIANTS_VCFEVAL_WF.out.bcftools_version
@@ -401,15 +472,15 @@ workflow WES_WF {
         ch_snpeff_version = Channel.empty()
         ch_snpeff_report = Channel.empty()        
 
-        if ( params.genome == "GRCh37" || params.genome == "GRCh38" ){
-            if ( !params.skip_variant_annotation ) {
+        if ( ch_genome == "GRCh37" || ch_genome == "GRCh38" ){
+            if ( !ch_skip_variant_annotation ) {
                 SNPEFF_ANNOTATION_WF (
                                     BCFTOOLS_VIEW.out.filtered_wt_vcf,
-                                    params.snpeff_db,
-                                    params.snpeff_genome_name,
-                                    params.hgvs_old,
-                                    params.publish_dir,
-                                    params.enable_publish
+                                    ch_snpeff_db,
+                                    ch_snpeff_genome_name,
+                                    ch_hgvs_old,
+                                    ch_publish_dir,
+                                    ch_enable_publish
                                   )
                                   
                 ch_snpeff_report = SNPEFF_ANNOTATION_WF.out.report
@@ -436,8 +507,8 @@ workflow WES_WF {
 
         REPORT_VERSIONS_WF(
                             ch_tool_versions,
-                            params.publish_dir,
-                            params.enable_publish
+                            ch_publish_dir,
+                            ch_enable_publish
                           )
 
         collect_mqc = ch_sentieon_metrics.collect().ifEmpty([])
@@ -453,29 +524,28 @@ workflow WES_WF {
 
         params_meta = [
             session_id: workflow.sessionId,
-            mode: params.mode,
-            exome_panel: params.exome_panel,
-            genome: params.genome,
+            mode: ch_mode,
+            exome_panel: ch_exome_panel,
+            genome: ch_genome,
             variant_caller: variant_caller_modified,
-            near_distance: params.NEAR_DISTANCE,
-            skip_Variant_Annotation: params.skip_variant_annotation,
-            skip_Evaluate_Variant_Calling: params.skip_vcfeval,
-            skip_ADO_Benchmarking: params.skip_ado
+            near_distance: ch_near_distance,
+            skip_Variant_Annotation: ch_skip_variant_annotation,
+            skip_Evaluate_Variant_Calling: ch_skip_vcfeval,
+            skip_ADO_Benchmarking: ch_skip_ado
         ]
 
         if (variant_caller_modified == 'dnascope') {
-            params_meta['dnascope_model'] = params.dnascope_model_selection
+            params_meta['dnascope_model'] = ch_dnascope_model_selection
         }
 
         MULTIQC_WF ( collect_mqc,
                     params_meta,
-                    params.multiqc_config,
-                    params.publish_dir,
-                    params.enable_publish
+                    ch_multiqc_config,
+                    ch_publish_dir,
+                    ch_enable_publish
                   )
 
-        ch_multiqc_version = MULTIQC_WF.out.version
-        MULTIQC_WF.out.report.ifEmpty{ exit 1, "ERROR: cannot generate any MULTIQC Report." }
+        MULTIQC_WF.out.report.ifEmpty{ error "ERROR: cannot generate any MULTIQC Report." }
 
 
 }
@@ -522,8 +592,8 @@ workflow.onComplete {
         }
     }
     
-    def output_json = JsonOutput.toJson(output)
-    def output_json_pretty = JsonOutput.prettyPrint(output_json)
+    def output_json = groovy.json.JsonOutput.toJson(output)
+    def output_json_pretty = groovy.json.JsonOutput.prettyPrint(output_json)
     File outputfile = new File("$params.tmp_dir/output.json")
     outputfile.write(output_json_pretty)
     println(output_json_pretty)
