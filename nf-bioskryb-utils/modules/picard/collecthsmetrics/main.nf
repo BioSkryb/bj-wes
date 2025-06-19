@@ -15,6 +15,7 @@ process PICARD_COLLECTHSMETRICS {
     
     output:
     tuple val(sample_name), file("*sentieonmetrics*"), emit: metrics_tuple
+    path("*.hsmetricalgo.sentieonmetrics.txt"), emit: metrics_only
     path("picard_version.yml"), emit: version
     
     script:
@@ -57,6 +58,7 @@ workflow PICARD_COLLECTHSMETRICS_WF {
                                 )
     emit:
         report = PICARD_COLLECTHSMETRICS.out.metrics_tuple
+        metrics = PICARD_COLLECTHSMETRICS.out.metrics_only
         version = PICARD_COLLECTHSMETRICS.out.version
 }
 
